@@ -233,10 +233,28 @@ function APICache(config) {
 		var reqBodyRef = {
 			requestBody: ''
 		}
+
 		this._getRequestBody(req, reqBodyRef)
+
 
 		var promise = new Promise(function(resolve, reject) {
 			var apiReq = request(url)
+
+			var envelope = { // this envelope is used just in _getFileName
+				reqMethod: apiReq.method,
+				reqURL: that._clearURLParams(url),
+				reqBody: reqBodyRef.requestBody,
+				version: packageJson.version,
+				headers: {
+					'content-type': 'application/json; charset=utf-8'
+				}
+			}
+			const filename = that._getFileName(envelope)
+
+			if (fs.existsSync(filename)) {
+				return that.sendCachedResponse(res, envelope, resolve, reject)
+			}
+
 			if (that.config.cacheEnabled) {
 				req
 				.pipe(apiReq)
