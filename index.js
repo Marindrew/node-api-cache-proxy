@@ -246,7 +246,9 @@ function APICache(config) {
 				reqBody: reqBodyRef.requestBody,
 				version: packageJson.version,
 				headers: {
-					'content-type': 'application/json; charset=utf-8'
+					'content-type': 'application/json; charset=utf-8',
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
 				}
 			}
 			const filename = that._getFileName(envelope)
