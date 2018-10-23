@@ -14,6 +14,7 @@ var path = require('path')
 var request = require('request')
 var sanitize = require('sanitize-filename')
 var zlib = require('zlib')
+var intoStream = require('into-stream')
 
 var MODULE_NAME = 'api-cache-proxy'
 
@@ -257,8 +258,13 @@ function APICache(config) {
 				return that.sendCachedResponse(res, envelope, resolve, reject)
 			}
 
+			let text = req.body;
+			let reqNew     = intoStream(text);
+			reqNew.method  = req.method;
+			reqNew.headers = req.headers;
+
 			if (that.config.cacheEnabled) {
-				req
+				reqNew
 				.pipe(apiReq)
 				.on('response', function(response) {
 					that.onResponse(response, res, reqBodyRef.requestBody, resolve, reject)
@@ -270,7 +276,7 @@ function APICache(config) {
 					})
 				})
 			} else {
-				req.pipe(apiReq).pipe(res)
+				reqNew.pipe(apiReq).pipe(res)
 
 				apiReq.on('response', function() {
 					resolve({dataSource: 'API'})
